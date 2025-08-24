@@ -1,0 +1,505 @@
+{
+  "name": "Smart Invoice Followup System",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        20
+      ],
+      "id": "dd5aa5ef-6970-448a-9a2e-3c2851eb0da7",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1oPx-jSljqW1YVpojZ9zPa10H7MoiQERIdrFESS6lUqo",
+          "mode": "list",
+          "cachedResultName": "Smart Invoice System Example",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oPx-jSljqW1YVpojZ9zPa10H7MoiQERIdrFESS6lUqo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oPx-jSljqW1YVpojZ9zPa10H7MoiQERIdrFESS6lUqo/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        220,
+        150
+      ],
+      "id": "949f0ab9-a966-4120-abe9-1d9ff44fa2b9",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EOibXIc4U8wcXyRR",
+          "name": "YouTube"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c09a2d8d-29ed-45c9-a8fa-00bfcb913378",
+              "name": "daysSinceSent",
+              "value": "={{ $now.diffTo($json['Date Sent'], 'days').round() }}",
+              "type": "number"
+            },
+            {
+              "id": "07206597-825a-4b32-b37e-a7d801985f07",
+              "name": "email",
+              "value": "={{ $json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "66deeae3-de18-4b47-8cb0-48f6b0b7aa49",
+              "name": "firstName",
+              "value": "={{ $json[\"Client Name\"].split(\" \")[0] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        440,
+        150
+      ],
+      "id": "2de0297d-3ab6-432a-a096-1e028b8bbf4c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d181237f-cfbe-458a-8d55-979db05e73f4",
+              "leftValue": "={{ $json.daysSinceSent }}",
+              "rightValue": 7,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "97436f9c-bd1d-4b55-a13f-0db6d6413ac0",
+              "leftValue": "={{ $json.daysSinceSent }}",
+              "rightValue": 14,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "2547e0b3-5774-4595-ab7c-11014e9326f4",
+              "leftValue": "={{ $json.daysSinceSent }}",
+              "rightValue": 21,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "4e3f0df8-bb44-4c1f-a24d-4f6a1b6164d5",
+              "leftValue": "={{ $json.daysSinceSent }}",
+              "rightValue": 28,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        150
+      ],
+      "id": "974084da-f66e-4d79-953e-7eef1a00aace",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        880,
+        150
+      ],
+      "id": "00175045-bccf-4f26-bf07-296d3d73e219",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 10,
+        "simple": false,
+        "filters": {
+          "q": "=from:{{ $json.email }} OR to:{{ $json.email }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1100,
+        75
+      ],
+      "id": "ed7af6f0-3b03-4a0e-bfe8-b5550a5a8b28",
+      "name": "Gmail",
+      "webhookId": "aaf3c7f9-6ebb-49e3-8ca7-220c051cb6cc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fhD8H5s1MrHGhcsj",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "text"
+            },
+            {
+              "fieldToAggregate": "headers.date"
+            }
+          ]
+        },
+        "options": {
+          "mergeLists": true
+        }
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        75
+      ],
+      "id": "e432f02f-7135-4133-bc2d-b3f6ca3cc11e",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You're a helpful, intelligent administrative assistant. You help me follow up with emails.",
+              "role": "system"
+            },
+            {
+              "content": "=I am following up with overdue invoices by sending a series of templated emails. Your task is to read through a conversation history between me and the prospect and determine whether I can send the email as-is, or if there are some changes I need to make to the template.\n\nHere is the template:\n\n`\n{{ \n  $if(\n    $('Loop Over Items').item.json.daysSinceSent === 7, $json.followUpTemplateArray[0],\n    $if(\n      $('Loop Over Items').item.json.daysSinceSent === 14, $json.followUpTemplateArray[1],\n      $if(\n        $('Loop Over Items').item.json.daysSinceSent === 21, $json.followUpTemplateArray[2],\n        $if(\n          $('Loop Over Items').item.json.daysSinceSent === 28, $json.followUpTemplateArray[3],\n          null\n        )\n      )\n    )\n  ) \n}}`\n\nYou'll return your answer in JSON using this format:\n\n{\"verdict\":\"true or false\",\"emailTemplate\":\"modified email template with \\n in place of newlines\"}\n\nRules:\n- If we sent or received an email discussing the invoice in the last 72 hours, do not follow up. This would be annoying. If this occurs, just skip and return \"false\" for verdict.\n- If we did not send an email discussing the invoice in the last 72 hours, return \"true\" for verdict.\n- If we've discussed something that materially makes the followup seem strange (i.e repeats the same information, or says something out of context), modify the template to accommodate for this. Do not modify the template unless it's necessary to maintain a cohesive conversation.\n\nCurrent date:\n{{ $now }}\n\nConversation history:\n{{ $json.textWithDate }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1760,
+        80
+      ],
+      "id": "3ec2726d-4165-4960-8241-2b783bb98303",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "kRhXLl2JwVGc05AE",
+          "name": "YouTube_Feb 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b55b50fb-0d38-456d-b19c-0d8b3953487a",
+              "name": "textWithDate",
+              "value": "={{ $json.text.map((item,index) => $json.date[index] + '\\n' + item ) }}",
+              "type": "string"
+            },
+            {
+              "id": "84ec4118-bbec-4417-bf5a-c994fad40f3b",
+              "name": "followUpTemplateArray",
+              "value": "=[\"Hey {{ $('Loop Over Items').item.json.firstName }},\\n\\nHope you're well. Just checking in on that invoice I sent you earlier. Let me know if you need anything.\\n\\nThanks,\\nNick\",\"Hi {{ $('Loop Over Items').item.json.firstName }},\\n\\nFollowing up about the invoice. Am here to help if anything is unclear—shout anytime.\\n\\nThanks,\\nNick\",\"Hey {{ $('Loop Over Items').item.json.firstName }},\\n\\nThought I'd send another ping re: my last invoice. Let me know!\\n\\nBest,\\nNick\",\"Hi {{ $('Loop Over Items').item.json.firstName }},\\n\\nI know it's been a while since that last invoice, and it's not my intention to bother—just want to follow up and make sure I can close this out. Let me know if there's anything I can do to help.\\n\\nBest,\\nNick\"]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1540,
+        75
+      ],
+      "id": "18090468-75ce-45ee-94d3-4c2630bfeea8",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "404354e4-5fb9-4cda-a033-176cf6d1ce45",
+              "leftValue": "={{ $json.message.content.verdict }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        2136,
+        75
+      ],
+      "id": "97fc0856-b9f9-4017-90bc-0d697261b997",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Re: Invoice for {{ $('Loop Over Items').item.json.firstName }}",
+        "message": "={{ $json.message.content.emailTemplate }}",
+        "options": {
+          "sendTo": "={{ $('Loop Over Items').item.json.email }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2356,
+        150
+      ],
+      "id": "835c5f4c-19cd-4942-81bd-9f1c3bd4396a",
+      "name": "Gmail1",
+      "webhookId": "fc132765-0368-44f3-8b83-fbb7bb517396",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fhD8H5s1MrHGhcsj",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -40,
+        320
+      ],
+      "id": "9a82e86c-1988-4423-b2f7-8e42c447defb",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {
+    "When clicking ‘Execute workflow’": [
+      {
+        "json": {}
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Gmail1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a947a103-56ce-43e6-a647-1eeab4c72a58",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d7661a849ead114a9aa6d9ceaf4160465aeb79532a35bde62160c840ffba9fc8"
+  },
+  "id": "krCtlHDssldDicnv",
+  "tags": []
+}
